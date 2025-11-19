@@ -4,7 +4,7 @@ import {
   getAllLinks,
   getLinkStats,
   deleteLink
-} from "../controllers/linksController.js";
+} from "../controllers/linkscontroller.js";
 
 const router = express.Router();
 
