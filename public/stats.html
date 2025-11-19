@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TinyLink — Stats</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+  <header class="bg-white shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-semibold">TinyLink — Link Stats</h1>
+      </div>
+      <div>
+        <a href="/" class="text-sky-600 hover:underline">Back to Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <div id="card" class="bg-white rounded-lg shadow p-6">
+      <div id="loading" class="text-sm text-slate-500">Loading...</div>
+
+      <div id="content" class="hidden">
+        <h2 id="codeTitle" class="text-xl font-semibold mb-2"></h2>
+        <p id="originalUrl" class="text-sky-600 mb-3"></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 bg-slate-50 rounded">
+            <div class="text-sm text-slate-600">Total Clicks</div>
+            <div id="clicks" class="text-2xl font-bold">0</div>
+          </div>
+          <div class="p-4 bg-slate-50 rounded">
+            <div class="text-sm text-slate-600">Last Clicked</div>
+            <div id="lastClicked" class="text-lg">-</div>
+          </div>
+          <div class="p-4 bg-slate-50 rounded">
+            <div class="text-sm text-slate-600">Short URL</div>
+            <div class="flex items-center gap-2">
+              <a id="shortUrl" class="text-sky-600 hover:underline" href="#" target="_blank"></a>
+              <button id="copyBtn" class="px-2 py-1 bg-slate-100 rounded">Copy</button>
+              <button id="openBtn" class="px-2 py-1 bg-sky-600 text-white rounded">Open</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <h3 class="text-sm text-slate-600">Raw data</h3>
+          <pre id="raw" class="bg-slate-100 p-3 rounded text-xs"></pre>
+        </div>
+      </div>
+
+      <div id="notfound" class="hidden text-red-600">Link not found.</div>
+    </div>
+  </main>
+
+  <script>
+    const base = window.location.origin;
+    const API = base + '/api/links';
+
+    function prettyDate(dt) {
+      if (!dt) return '-';
+      try { return new Date(dt).toLocaleString(); } catch { return dt; }
+    }
+
+    function getCodeFromPath() {
+      const parts = window.location.pathname.split('/');
+      // expected /code/:code
+      return parts[2] || null;
+    }
+
+    async function loadStats() {
+      const code = getCodeFromPath();
+      if (!code) {
+        document.getElementById('loading').textContent = 'No code in URL';
+        return;
+      }
+
+      try {
+        const res = await fetch(API + '/' + code);
+        if (res.status === 404) {
+          document.getElementById('loading').classList.add('hidden');
+          document.getElementById('notfound').classList.remove('hidden');
+          return;
+        }
+        const json = await res.json();
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('content').classList.remove('hidden');
+
+        document.getElementById('codeTitle').textContent = json.code;
+        document.getElementById('originalUrl').textContent = json.url;
+        document.getElementById('clicks').textContent = json.clicks ?? 0;
+        document.getElementById('lastClicked').textContent = prettyDate(json.last_clicked);
+
+        const short = base + '/' + json.code;
+        document.getElementById('shortUrl').textContent = short;
+        document.getElementById('shortUrl').href = short;
+        document.getElementById('raw').textContent = JSON.stringify(json, null, 2);
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(short); alert('Copied'); } catch { alert('Copy failed'); }
+        });
+        document.getElementById('openBtn').addEventListener('click', () => window.open(short, '_blank'));
+      } catch (e) {
+        console.error(e);
+        document.getElementById('loading').textContent = 'Server error';
+      }
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>
