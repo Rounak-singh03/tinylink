@@ -4,10 +4,10 @@ TinyLink is a simple URL-shortening application similar to Bitly.
 Users can create short links, view click statistics, delete links, and visit a dedicated stats page.
 
 ## 🚀 Live Demo
-https://tinylink-2.onrender.com/
+https://tinylink-3.onrender.com/
 
 ## 🎥 Video Explanation
-<PASTE YOUR VIDEO LINK HERE>
+https://drive.google.com/file/d/1psTRJaKtqSEWIiG0Dg6tBDsKJ9O1G8RP/view?usp=sharing
 
 ## 📂 GitHub Repository
 https://github.com/Rounak-singh03/tinylink
